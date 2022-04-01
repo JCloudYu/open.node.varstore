@@ -1,17 +1,17 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RemoteStorage = void 0;
-var _RemoteStorage = new WeakMap();
-var RemoteStorage = /** @class */ (function () {
-    function RemoteStorage(connector) {
-        _RemoteStorage.set(this, { connector: connector });
+exports.VarStore = void 0;
+var _VarStore = new WeakMap();
+var VarStore = /** @class */ (function () {
+    function VarStore(connector) {
+        _VarStore.set(this, { connector: connector });
     }
-    RemoteStorage.prototype.list = function () {
-        var connector = _RemoteStorage.get(this).connector;
+    VarStore.prototype.list = function () {
+        var connector = _VarStore.get(this).connector;
         return connector.list();
     };
-    RemoteStorage.prototype.var = function (name, value) {
-        var connector = _RemoteStorage.get(this).connector;
+    VarStore.prototype.var = function (name, value) {
+        var connector = _VarStore.get(this).connector;
         if (arguments.length < 2) {
             return connector.get(name);
         }
@@ -20,6 +20,6 @@ var RemoteStorage = /** @class */ (function () {
         }
         return connector.del(name);
     };
-    return RemoteStorage;
+    return VarStore;
 }());
-exports.RemoteStorage = RemoteStorage;
+exports.VarStore = VarStore;

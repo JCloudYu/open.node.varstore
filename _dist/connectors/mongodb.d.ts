@@ -1,4 +1,4 @@
-import type { IStorageConnect } from "../varstore.js";
+import type { IStorageConnect, StoredTypes, AllowedInputTypes } from "../varstore.js";
 declare type InitOptions = {
     uri: string;
     db?: string;
@@ -7,8 +7,9 @@ declare type InitOptions = {
 declare class MongoConnector implements IStorageConnect {
     static init(conn_info: InitOptions): Promise<MongoConnector>;
     list(): Promise<string[]>;
-    get<ValueType = any>(name: string): Promise<ValueType | undefined>;
-    set<ValueType = any>(name: string, value: ValueType): Promise<boolean>;
-    del<ValueType = any>(name: string): Promise<ValueType | undefined>;
+    get(name: string): Promise<StoredTypes | undefined>;
+    set(name: string, value: AllowedInputTypes): Promise<boolean>;
+    del(name: string): Promise<StoredTypes | undefined>;
+    release(): Promise<void>;
 }
 export default MongoConnector;

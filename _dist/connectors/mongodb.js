@@ -35,11 +35,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-var mongodb_1 = __importDefault(require("mongodb"));
+var mongodb = require("mongodb");
 var _MongoConnector = new WeakMap();
 var MongoConnector = /** @class */ (function () {
     function MongoConnector() {
@@ -52,12 +49,10 @@ var MongoConnector = /** @class */ (function () {
                     case 0:
                         raw_uri = ('' + (conn_info.uri || '')).trim();
                         db_name = conn_info.db;
-                        if (!db_name)
-                            throw new SyntaxError("Bound database name is required!");
                         coll_name = ('' + (conn_info.collection || '')).trim();
                         if (!coll_name)
                             throw new SyntaxError("Bound collection name is required!");
-                        return [4 /*yield*/, mongodb_1.default.MongoClient.connect(raw_uri)];
+                        return [4 /*yield*/, mongodb.MongoClient.connect(raw_uri)];
                     case 1:
                         mongo_client = _a.sent();
                         mongo_db = db_name ? mongo_client.db() : mongo_client.db(db_name);
@@ -74,15 +69,19 @@ var MongoConnector = /** @class */ (function () {
     };
     MongoConnector.prototype.list = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, db, coll_name, names;
+            var _a, db, coll_name, result;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         _a = _MongoConnector.get(this), db = _a.db, coll_name = _a.coll_name;
-                        return [4 /*yield*/, db.collection(coll_name).find([]).toArray()];
+                        return [4 /*yield*/, db.collection(coll_name).aggregate([
+                                { $sort: { name: 1 } },
+                                { $group: { _id: null, names: { $push: "$name" } } },
+                                { $project: { _id: 0 } }
+                            ]).toArray()];
                     case 1:
-                        names = (_b.sent())[0].names;
-                        return [2 /*return*/, names];
+                        result = (_b.sent())[0];
+                        return [2 /*return*/, result ? result.names : []];
                 }
             });
         });
@@ -97,7 +96,12 @@ var MongoConnector = /** @class */ (function () {
                         return [4 /*yield*/, db.collection(coll_name).find({ name: name }).toArray()];
                     case 1:
                         data = (_b.sent())[0];
-                        return [2 /*return*/, data ? data.value : undefined];
+                        if (!data)
+                            return [2 /*return*/, undefined];
+                        if (data.value instanceof mongodb.Binary) {
+                            return [2 /*return*/, data.value.buffer];
+                        }
+                        return [2 /*return*/, data.value];
                 }
             });
         });
@@ -109,10 +113,16 @@ var MongoConnector = /** @class */ (function () {
                 switch (_b.label) {
                     case 0:
                         _a = _MongoConnector.get(this), db = _a.db, coll_name = _a.coll_name;
-                        return [4 /*yield*/, db.collection(coll_name).updateOne({ name: name }, { $set: { value: value } })];
+                        if (Buffer.isBuffer(value) || value instanceof ArrayBuffer) {
+                            value = Buffer.from(value);
+                        }
+                        else if (ArrayBuffer.isView(value)) {
+                            value = Buffer.from(value.buffer);
+                        }
+                        return [4 /*yield*/, db.collection(coll_name).updateOne({ name: name }, { $set: { value: value }, $setOnInsert: { name: name } }, { upsert: true })];
                     case 1:
                         result = _b.sent();
-                        return [2 /*return*/, result.matchedCount > 0];
+                        return [2 /*return*/, (result.upsertedCount + result.matchedCount) > 0];
                 }
             });
         });
@@ -131,6 +141,15 @@ var MongoConnector = /** @class */ (function () {
                             return [2 /*return*/, undefined];
                         return [2 /*return*/, value.value];
                 }
+            });
+        });
+    };
+    MongoConnector.prototype.release = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var conn;
+            return __generator(this, function (_a) {
+                conn = _MongoConnector.get(this).conn;
+                return [2 /*return*/, conn.close()];
             });
         });
     };

@@ -1,8 +1,8 @@
 {
 	"name": "varstore",
-	"version": "0.0.1",
+	"version": "0.1.0",
 	"description": "A tiny variable storage system",
-	"main": "varstore.js",
+	"main": "./_dist/varstore.js",
 	"scripts": {
 		"prebuild": "rm -rf ./_dist",
 		"build": "tsc"

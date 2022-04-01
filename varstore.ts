@@ -1,35 +1,38 @@
+type BinaryData = Buffer|ArrayBuffer|DataView|Uint8ClampedArray|Uint8Array|Int8Array|Uint16Array|Int16Array|Uint32Array|Int32Array|Float32Array|Float64Array;
+export type StoredTypes = boolean|number|string|null|Buffer;
+export type AllowedInputTypes = StoredTypes|BinaryData;
 export interface IStorageConnect {
 	list():Promise<string[]>;
-	get<ReturnType=any>(var_name:string):Promise<ReturnType|undefined>;
-	set<ValueType=any>(var_name:string, value:ValueType):Promise<boolean>;
-	del<ReturnType=any>(var_name:string):Promise<undefined|ReturnType>;
+	get(var_name:string):Promise<StoredTypes|undefined>;
+	set(var_name:string, value:AllowedInputTypes):Promise<boolean>;
+	del(var_name:string):Promise<undefined|StoredTypes>;
 }
 
 
-const _RemoteStorage:WeakMap<RemoteStorage, {connector:IStorageConnect}> = new WeakMap();
-export class RemoteStorage {
+const _VarStore:WeakMap<VarStore, {connector:IStorageConnect}> = new WeakMap();
+export class VarStore {
 	constructor(connector:IStorageConnect) {
-		_RemoteStorage.set(this, {connector});
+		_VarStore.set(this, {connector});
 	}
 	
 	list():Promise<string[]> {
-		const {connector} = _RemoteStorage.get(this)!;
+		const {connector} = _VarStore.get(this)!;
 		return connector.list();
 	}
 
-	var<ValueType=any>(name:string):Promise<ValueType|undefined>;
-	var<ValueType=any>(name:string, value:ValueType):Promise<boolean>;
-	var<ValueType=any>(name:string, value?:ValueType):Promise<ValueType|undefined>|Promise<boolean> {
-		const {connector} = _RemoteStorage.get(this)!;
+	var(name:string):Promise<StoredTypes|undefined>;
+	var(name:string, value:AllowedInputTypes):Promise<boolean>;
+	var(name:string, value?:AllowedInputTypes):Promise<StoredTypes|undefined>|Promise<boolean> {
+		const {connector} = _VarStore.get(this)!;
 		if ( arguments.length < 2 ) {
-			return connector.get<ValueType>(name);
+			return connector.get(name);
 		}
 
 
 		if ( value !== undefined ) {
-			return connector.set<ValueType>(name, value);
+			return connector.set(name, value);
 		}
 
-		return connector.del<ValueType>(name);
+		return connector.del(name);
 	}
 }
