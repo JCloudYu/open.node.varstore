@@ -1,6 +1,6 @@
 {
 	"name": "varstore",
-	"version": "0.1.1",
+	"version": "0.2.0",
 	"description": "A tiny variable storage system",
 	"main": "./_dist/varstore.js",
 	"scripts": {
@@ -13,8 +13,7 @@
 	],
 	"author": "JCloudYu",
 	"license": "ISC",
-	"dependencies": {
-		"@types/mongodb": "^3.6.20",
-		"mongodb": "^3.7.3"
+	"devDependencies": {
+		"@types/node": "^17.0.23"
 	}
 }
