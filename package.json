@@ -1,0 +1,19 @@
+{
+	"name": "varstore",
+	"version": "0.0.1",
+	"description": "A tiny variable storage system",
+	"main": "varstore.js",
+	"scripts": {
+		"prebuild": "rm -rf ./_dist",
+		"build": "tsc"
+	},
+	"keywords": [
+		"Variable Storage",
+		"Storage"
+	],
+	"author": "JCloudYu",
+	"license": "ISC",
+	"dependencies": {
+		"mongodb": "^4.4.1"
+	}
+}
