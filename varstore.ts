@@ -3,9 +3,9 @@ export type StoredTypes = boolean|number|string|null|Buffer;
 export type AllowedInputTypes = StoredTypes|BinaryData;
 export interface IStorageConnect {
 	list():Promise<string[]>;
-	get(var_name:string):Promise<StoredTypes|undefined>;
-	set(var_name:string, value:AllowedInputTypes):Promise<boolean>;
-	del(var_name:string):Promise<undefined|StoredTypes>;
+	get<ReturnType extends StoredTypes = StoredTypes>(var_name:string):Promise<ReturnType|undefined>;
+	set<ValueType extends AllowedInputTypes = AllowedInputTypes>(var_name:string, value:ValueType):Promise<boolean>;
+	del<ReturnType extends StoredTypes = StoredTypes>(var_name:string):Promise<ReturnType|undefined>;
 }
 
 
@@ -20,19 +20,20 @@ export class VarStore {
 		return connector.list();
 	}
 
-	var(name:string):Promise<StoredTypes|undefined>;
-	var(name:string, value:AllowedInputTypes):Promise<boolean>;
-	var(name:string, value?:AllowedInputTypes):Promise<StoredTypes|undefined>|Promise<boolean> {
+	var<ReturnType extends StoredTypes = StoredTypes>(name:string):Promise<ReturnType|undefined>;
+	var<ReturnType extends StoredTypes = StoredTypes>(name:string, value:undefined):Promise<ReturnType|undefined>;
+	var<ValueType extends AllowedInputTypes=AllowedInputTypes>(name:string, value:ValueType):Promise<boolean>;
+	var<ReturnType extends StoredTypes = StoredTypes, ValueType extends AllowedInputTypes=AllowedInputTypes>(name:string, value:ValueType|undefined=undefined):Promise<ReturnType|undefined|boolean> {
 		const {connector} = _VarStore.get(this)!;
 		if ( arguments.length < 2 ) {
-			return connector.get(name);
+			return connector.get<ReturnType>(name);
 		}
 
 
 		if ( value !== undefined ) {
-			return connector.set(name, value);
+			return connector.set<ValueType>(name, value);
 		}
 
-		return connector.del(name);
+		return connector.del<ReturnType>(name);
 	}
 }

@@ -11,6 +11,7 @@ var VarStore = /** @class */ (function () {
         return connector.list();
     };
     VarStore.prototype.var = function (name, value) {
+        if (value === void 0) { value = undefined; }
         var connector = _VarStore.get(this).connector;
         if (arguments.length < 2) {
             return connector.get(name);
